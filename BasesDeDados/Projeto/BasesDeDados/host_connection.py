@@ -7,6 +7,7 @@ class Sistema():
       self.conn = None
       self.cursor = None
       
+   #  Inicia a conexão com o BD
    def connect(self):
       # Dados de conexão com o banco de dados
       (host, dbname, user, password) = ('localhost', 'postgres', 'postgres', 'postgres')
@@ -20,15 +21,18 @@ class Sistema():
       # Cria um cursor
       self.cursor = self.conn.cursor()
    
-   def execute_sql(self, sql):
+   #  Executa a query SQL
+   def executeSQL(self, sql):
    
       # Executa a instrução SQL
       self.cursor.execute(sql)
       #salva as alterações no banco de dados:
 
+   #  Commit no banco para finalizar uma transação.
    def commit(self):
       self.conn.commit()
 
+   # Mostra a tabela no terminal
    def showTable(self):
       # obtem resultados:
       resultados = self.cursor.fetchall()
@@ -44,5 +48,6 @@ class Sistema():
       # Mostra a tabela no terminal
       print(tabela)
 
+   # Fecha conexão com o BD
    def closeConn(self):
       self.conn.close()

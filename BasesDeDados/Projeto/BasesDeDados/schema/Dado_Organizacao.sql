@@ -1,6 +1,6 @@
---insert 
---ORGANIZACAO:
+--inserir dados nas tabelas:
 
+--ORGANIZACAO:
 insert into organizacao(cnpj, nome, regiao, pontuacao)
 values(1, 'CASA DA SOPA', 'CENTRO', 30);
 
@@ -11,7 +11,6 @@ insert into organizacao(cnpj, nome, regiao, pontuacao)
 values(3, 'AMIGOS DO JARIDM', 'CIDADE JARDIM', 12);
 
 -- BENEFICIO
-
 insert into BENEFICIO(NOME,data,DESTINO)
 values('TV 20 POLEGADAS', '2021-11-23', 2);
 

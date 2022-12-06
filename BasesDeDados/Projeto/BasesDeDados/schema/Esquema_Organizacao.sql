@@ -1,5 +1,4 @@
--- create tables:
-
+-- Criar Tabelas:
 create table organizacao(
 	cnpj bigint not null, --14 digitos
 	nome varchar(20) not null, 
@@ -42,7 +41,7 @@ create table voluntario(
 	--criar alter table foreing key voluntario(organizador) -> organizador(cpf) 
 );
 
-create table organizador (
+create table organizador(
 	cpf bigint not null,
 	setor varchar(15) not null,
 	constraint pk_organizador primary key(cpf),
@@ -148,7 +147,10 @@ create table recebe(
 );
 
 
---alter tables:
+--Alter Tables:
+
+
+-- 
 alter table voluntario
 	add constraint fk_voluntario_organizador foreign key(organizador) references organizador(cpf)
 	add constraint ck_voluntario_hora_trabalho 
