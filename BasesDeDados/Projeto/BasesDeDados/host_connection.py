@@ -28,7 +28,6 @@ class Sistema():
 
    def commit(self):
       self.conn.commit()
-      self.conn.close()
 
    def showTable(self):
       # obtem resultados:

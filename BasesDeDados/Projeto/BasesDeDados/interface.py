@@ -3,21 +3,32 @@ import time
 
 def printHello():
    print("-"*60 + "\n")
+   print("Carregando sistema...")
+   print("-"*60)
+   print("*"*60)
+   time.sleep(1) 
+   print("-"*60 + "\n")
+   print("Sistema carregado com sucesso!")
+   print("-"*60 + "\n")
+   print("-"*60 + "\n")
    print("Bem vindo!\n")
    time.sleep(1)   
-
 
 def printHeader():
    print("Escolha uma das opções abaixo:")
    print("-"*60)
-   print("1 - Inserir organização")
-   print("2 - Atualizar organização")
-   print("3 - Inserir Voluntário")
-   print("4 - Listar Organizações")
-   print("5 - Buscar Organização e a quantidade de voluntários")
+   print("1 - Listar Organizações")
+   print("2 - Inserir Organização")
+   print("3 - Atualizar Organização")
+   print("4 - Deletar Organização")
+   print("5 - Inserir Voluntário")
+   print("6 - Buscar Organização e a quantidade de voluntários")
+   print("7 - Buscar Organização e a quantidade de voluntários por horário de trabalho")
+   print("8 - Buscar Quantidade de Cozinheiros por Organização")
+   print("9 - Buscar Quantidade de Organizadores por Organização")
    print("0 - Sair")
    print("-"*60)
-    
+            
 def getOption():
    opcao = int(input("Digite a opção desejada: "))
    print("-"*60)
@@ -94,46 +105,177 @@ def updateOrganizacao(sis):
       nova_pontuacao = int(input("Insira a nova pontuação: "))
       sql = f"""update organizacao set pontuacao = {nova_pontuacao} where cnpj = {cnpj};"""
       sis.execute_sql(sql)
-   else:    print("Opção inválida!")
+   # Operação inválida.
+   else:    
+      print("-"*60)
+      print("Opção inválida! Tente novamente.")
+      print("-"*60)
+      updateOrganizacao(getOption(), sis)
+      return
+   
    print("Tabela após a atualização:")
    print("-"*60)
    sql = f"""select * from organizacao where cnpj = {cnpj};"""
    sis.execute_sql(sql)
    sis.showTable()
+   #commit no banco após uma atualização.
    sis.commit()   
 
 def showOrganizacao(sis):
    sis.execute_sql("select * from organizacao order by cnpj asc;")
    sis.showTable()
+
+def deleteOrganizacao(sis):
+   print("Organizações cadastradas:")
+   print("-"*60)
+   showOrganizacao(sis)
+   print("-"*60)
+   cnpj = int(input("Insira o CNPJ da organização que deseja deletar: "))
+   sql = f"""delete from organizacao where cnpj = {cnpj};"""
+   sis.execute_sql(sql)
    sis.commit()
+   time.sleep(1)
+   print("-"*60)
+   print("Organização deletada com sucesso!")
+   print("-"*60)
+   time.sleep(1)
+   print("Tabela após a deleção:")
+   print("-"*60)
+   showOrganizacao(sis)
 
-#-------------------------------------------------------------------------------   
-def selectOption(opcao, sis):
-   if opcao == 0:print("Tchau! =)")
    
-   #  Inserir organização:
-   elif opcao == 1:
-      insertOrganizacao(sis)
+def selectHoraTrabalhoOrg(sis):
+   sql = """
+         select nome from organizacao;
+   """
+   sis.execute_sql(sql)
+   sis.showTable()
    
-   #  Atualização de organização:
-   elif opcao == 2:
-      updateOrganizacao(sis)
    
-   #Inserção de Voluntário:
-   elif opcao == 3:
-      insertVoluntario(sis)
-
-   # Listar Organizações:
-   elif opcao == 4:
-      showOrganizacao(sis)
-
-   #Listar Organizações e a quantide de pontos:
-   elif opcao ==5:
-      sql = """  
+   print("-"*60)
+   nomeOrg = input("Insira o nome da organização: ").upper()
+   print("-"*60)
+   print("Organização Selecionada: ", nomeOrg)
+   print("-"*60)
+   
+   sql = f"""select v.hora_trabalho, count(o.cnpj) as qtde_funcionarios from voluntario v
+	left join organizacao o on o.cnpj = v.organizacao and o.nome = '{nomeOrg}'
+	group by v.hora_trabalho;
+	"""
+   
+   sis.execute_sql(sql)
+   sis.showTable()
+   
+   print("Deseja saber quais são os voluntários em cada horário?")
+   ans = input("Digite S para sim e N para não: ").upper()
+   if ans == 'S':
+      horario = input("Digite o horário que deseja saber os voluntários (diurno ou noturno): ").upper()      
+      
+      sql = f"""select v.cpf, v.hora_trabalho from voluntario v
+                  where v.organizacao = (select o.cnpj from organizacao o where o.nome = '{nomeOrg}') and v.hora_trabalho = '{horario}';"""
+      sis.execute_sql(sql)
+      sis.showTable()
+   else: 
+      recursion(sis)
+      return
+   
+def showOrganizacaoQtdeVoluntario(sis):
+   sql = """  
       select o.cnpj, o.nome, count(v.organizacao) as quantidade_voluntarios
       from organizacao o left join voluntario v on o.cnpj = v.organizacao 
       group by o.cnpj, o.nome 
       order by o.cnpj;"""
-      sis.execute_sql(sql)
-      sis.showTable()
-      sis.closeConn()
+   sis.execute_sql(sql)
+   sis.showTable()
+   sis.closeConn()
+   
+def recursion(sis):
+   time.sleep(2)
+   print("-"*60)
+   print("Qual operação deseja realizar agora?")
+   print('-'*60)
+   time.sleep(1)
+   printHeader()
+   selectOption(getOption(), sis)
+
+def selectQtdeOrganizadoresOrg(sis):
+   sql = """
+   select o.cnpj, o.nome, count(c.setor) as quantidade_organizador
+   from organizacao o left join voluntario v on o.cnpj = v.organizacao 
+   left join organizador c on v.cpf= c.cpf
+   group by o.cnpj,o.nome   
+   order by o.cnpj;
+   """
+   sis.execute_sql(sql)
+   sis.showTable()
+   
+def selectQtdeCozinheirosOrg(sis):
+   sql = """
+      	select o.cnpj, o.nome, count(c.posicao_cozinha) as qtde_cozinheiros
+    from organizacao o left join voluntario v on o.cnpj = v.organizacao 
+    left join cozinheiro c on v.cpf= c.cpf
+    group by o.cnpj,o.nome   
+    order by o.cnpj;
+   """
+   sis.execute_sql(sql)
+   sis.showTable()
+   
+#-------------------------------------------------------------------------------   
+def selectOption(opcao, sis):
+   if opcao == 0:
+      print("Tchau! =)\n")
+      print("Fazendo logout do sistema...")
+      time.sleep(1)
+      print("-"*60)
+      print("Logout do Sistema Concluido!")
+      print("-"*60)
+      
+   #  Listar Organizações:
+   elif opcao == 1:
+      print("Listando Organizações...")
+      print("-"*60)
+      showOrganizacao(sis)
+      recursion(sis)
+      
+   #  Inserção de Organização:
+   elif opcao == 2:
+      insertOrganizacao(sis)
+      recursion(sis)
+   
+   #  Atualização de Organização: (commit após atualização.)
+   elif opcao == 3:
+      updateOrganizacao(sis)
+      recursion(sis)
+
+   # #Delete de Organização: (commit após o delete.)
+   elif opcao == 4:
+      deleteOrganizacao(sis)
+      recursion(sis)
+
+   # Insert de Voluntário:
+   elif opcao ==5:
+      insertVoluntario(sis)
+      recursion(sis)
+      
+      
+     
+   # Buscar Organização e Qtde de Voluntarios
+   elif opcao == 6:
+      showOrganizacaoQtdeVoluntario(sis)
+      recursion(sis)
+      
+      
+   # Buscar Organizacao, Horário de Trabalho e Qtde de Voluntarios
+   elif opcao == 7:
+      selectHoraTrabalhoOrg(sis)
+      recursion(sis)
+      
+   # Quantidade de Cozinheiros por Organização
+   elif opcao == 8:
+      selectQtdeCozinheirosOrg(sis)
+      recursion(sis)
+      
+   #Quantidade de Organizadores por Organização   
+   elif opcao == 9:
+      selectQtdeOrganizadoresOrg(sis)
+      recursion(sis)
