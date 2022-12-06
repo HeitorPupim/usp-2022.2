@@ -160,7 +160,7 @@ def selectHoraTrabalhoOrg(sis):
    
    # Obtem o nome da organização
    print("-"*60)
-   nomeOrg = input("Insira o nome da organização: ").upper() #tratamento de string para evitar erros de case sensitive
+   nomeOrg = validateString(input("Insira o nome da organização: ").upper(),sis) #tratamento de string para evitar erros de case sensitive
    print("-"*60)
    print("Organização Selecionada: ", nomeOrg)
    print("-"*60)
@@ -173,11 +173,11 @@ def selectHoraTrabalhoOrg(sis):
    sis.executeSQL(sql)
    sis.showTable()
    print("Deseja saber quais são os voluntários em cada horário?")
-   ans = input("Digite S para sim e N para não: ").upper()
+   ans = validateString(input("Digite S para sim e N para não: ").upper(), sis)
    
    # Se a resposta for positiva, prossegue:
    if ans == 'S':
-      horario = input("Digite o horário que deseja saber os voluntários (diurno ou noturno): ").upper()      
+      horario = validateString(input("Digite o horário que deseja saber os voluntários (diurno ou noturno): ").upper(), sis)  
       
       sql = f"""select v.cpf, v.hora_trabalho from voluntario v
                   where v.organizacao = (select o.cnpj from organizacao o where o.nome = '{nomeOrg}') and v.hora_trabalho = '{horario}';"""
